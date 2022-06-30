@@ -12,6 +12,8 @@ import constants.AttributeConst;
 import constants.ForwardConst;
 import constants.JpaConst;
 import constants.MessageConst;
+import models.Iine;
+import services.IineService;
 import services.ReportService;
 
 /**
@@ -114,7 +116,9 @@ public class ReportAction extends ActionBase {
                     getRequestParam(AttributeConst.REP_TITLE),
                     getRequestParam(AttributeConst.REP_CONTENT),
                     null,
-                    null);
+                    null,
+                    getRequestParam(AttributeConst.REP_TIME_IN),
+                    getRequestParam(AttributeConst.REP_TIME_OUT));
 
             //日報情報登録
             List<String> errors = service.create(rv);
@@ -148,6 +152,29 @@ public class ReportAction extends ActionBase {
      */
     public void show() throws ServletException, IOException {
 
+        IineService iineService = new IineService();
+        // 日報ID
+        int reportId = toNumber(getRequestParam(AttributeConst.REP_ID));
+
+        // ログインユーザー情報を取得
+        EmployeeView ev = (EmployeeView) getSessionScope(AttributeConst.LOGIN_EMP);
+
+        int userId = ev.getId();
+
+        // 日報に登録されたいいねの件数を取得する
+        Long reportForCount = iineService.getIineCountByReport(reportId);
+
+        // 日報にユーザーがいいねを登録した件数を取得
+        Long userCreateCount = iineService.getIineCountByReportAndUser(reportId, userId);
+        boolean isIine = false;
+
+        if (userCreateCount >= 1) {
+                // 1件以上の場合
+                isIine = true;
+        }
+
+        iineService.close();
+
         //idを条件に日報データを取得する
         ReportView rv = service.findOne(toNumber(getRequestParam(AttributeConst.REP_ID)));
 
@@ -158,7 +185,8 @@ public class ReportAction extends ActionBase {
         } else {
 
             putRequestScope(AttributeConst.REPORT, rv); //取得した日報データ
-
+            putRequestScope(AttributeConst.IINE_COUNT, reportForCount); //いいねの件数
+            putRequestScope(AttributeConst.IS_IINE, isIine); //いいね済みフラグ
             //詳細画面を表示
             forward(ForwardConst.FW_REP_SHOW);
         }
@@ -194,6 +222,51 @@ public class ReportAction extends ActionBase {
     }
 
     /**
+     * いいねを行う
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void iine() throws ServletException, IOException {
+
+        IineService iineService = new IineService();
+        // 日報ID
+        int reportId = toNumber(getRequestParam(AttributeConst.REP_ID));
+
+        // ログインユーザー情報を取得
+        EmployeeView ev = (EmployeeView) getSessionScope(AttributeConst.LOGIN_EMP);
+
+        int userId = ev.getId();
+
+        Long count = iineService.getIineCountByReportAndUser(reportId, userId);
+        // 件数を判定
+        if (count == 0) {
+            // 0件の場合、未登録として扱い、データを登録する
+            Iine iine = new Iine();
+            iine.setIine_article_id(reportId);
+            iine.setIine_user(userId);
+
+            // いいねテーブルにレコードを登録
+            iineService.create(iine);
+        } else {
+            // 既に登録されている場合、何もしない
+        }
+
+        iineService.close();
+
+
+        //詳細画面にリダイレクト
+        //URLを構築
+        String redirectUrl = request.getContextPath() + "/?action=" + ForwardConst.ACT_REP.getValue();
+
+        redirectUrl = redirectUrl + "&command=" + ForwardConst.CMD_SHOW.getValue();
+        redirectUrl = redirectUrl + "&id=" + reportId;
+
+        //URLへリダイレクト
+        response.sendRedirect(redirectUrl);
+
+    }
+
+    /**
      * 更新を行う
      * @throws ServletException
      * @throws IOException
@@ -210,6 +283,8 @@ public class ReportAction extends ActionBase {
             rv.setReportDate(toLocalDate(getRequestParam(AttributeConst.REP_DATE)));
             rv.setTitle(getRequestParam(AttributeConst.REP_TITLE));
             rv.setContent(getRequestParam(AttributeConst.REP_CONTENT));
+            rv.setTimeIn(getRequestParam(AttributeConst.REP_TIME_IN));
+            rv.setTimeOut(getRequestParam(AttributeConst.REP_TIME_OUT));
 
             //日報データを更新する
             List<String> errors = service.update(rv);
@@ -224,6 +299,7 @@ public class ReportAction extends ActionBase {
                 //編集画面を再表示
                 forward(ForwardConst.FW_REP_EDIT);
             } else {
+
                 //更新中にエラーがなかった場合
 
                 //セッションに更新完了のフラッシュメッセージを設定

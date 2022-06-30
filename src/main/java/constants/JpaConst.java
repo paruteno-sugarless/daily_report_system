@@ -23,6 +23,9 @@ public interface JpaConst {
     String EMP_COL_CREATED_AT = "created_at"; //登録日時
     String EMP_COL_UPDATED_AT = "updated_at"; //更新日時
     String EMP_COL_DELETE_FLAG = "delete_flag"; //削除フラグ
+    String REP_COL_TIME_IN = "time_in"; //出勤日時
+    String REP_COL_TIME_OUT = "time_out"; //退勤日時"
+
 
     int ROLE_ADMIN = 1; //管理者権限ON(管理者)
     int ROLE_GENERAL = 0; //管理者権限OFF(一般)
@@ -39,6 +42,13 @@ public interface JpaConst {
     String REP_COL_CONTENT = "content"; //日報の内容
     String REP_COL_CREATED_AT = "created_at"; //登録日時
     String REP_COL_UPDATED_AT = "updated_at"; //更新日時
+
+    //いいねテーブル
+    String TABLE_IIN = "iine"; //テーブル名
+    //いいねテーブルカラム
+    String IIN_COL_ID = "id"; //id
+    String IIN_COL_ART = "iine_article_id"; //いいねした記事のid
+    String IIN_COL_USE = "iine_user"; //いいねした人のユーザーコード
 
     //Entity名
     String ENTITY_EMP = "employee"; //従業員

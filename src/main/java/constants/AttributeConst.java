@@ -41,6 +41,10 @@ public enum AttributeConst {
     DEL_FLAG_TRUE(1),
     DEL_FLAG_FALSE(0),
 
+    //いいねフラグ
+    IINE_COUNT("count"),
+    IS_IINE("is_iine"),
+
     //日報管理
     REPORT("report"),
     REPORTS("reports"),
@@ -48,7 +52,9 @@ public enum AttributeConst {
     REP_ID("id"),
     REP_DATE("report_date"),
     REP_TITLE("title"),
-    REP_CONTENT("content");
+    REP_CONTENT("content"),
+    REP_TIME_IN("timeIn"),
+    REP_TIME_OUT("timeOut");
 
     private final String text;
     private final Integer i;

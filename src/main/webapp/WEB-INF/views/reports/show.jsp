@@ -2,12 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ page import="constants.ForwardConst" %>
+<%@ page import="constants.AttributeConst"%>
 
 <c:set var="actRep" value="${ForwardConst.ACT_REP.getValue()}" />
 <c:set var="commIdx" value="${ForwardConst.CMD_INDEX.getValue()}" />
 <c:set var="commEdt" value="${ForwardConst.CMD_EDIT.getValue()}" />
+<c:set var="commIine" value="${ForwardConst.CMD_IINE.getValue()}" />
 
 <c:import url="/WEB-INF/views/layout/app.jsp">
+
     <c:param name="content">
 
         <h2>日報 詳細ページ</h2>
@@ -28,6 +31,15 @@
                     <td><pre><c:out value="${report.content}" /></pre></td>
                 </tr>
                 <tr>
+                <tr>
+                    <th>出勤時間</th>
+                    <td><c:out value="${report.timeIn}"/></td>
+                </tr>
+                <tr>
+                    <th>退勤時間</th>
+                    <td><c:out value="${report.timeOut}"/></td>
+                </tr>
+                <tr>
                     <th>登録日時</th>
                     <fmt:parseDate value="${report.createdAt}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="createDay" type="date" />
                     <td><fmt:formatDate value="${createDay}" pattern="yyyy-MM-dd HH:mm:ss" /></td>
@@ -45,6 +57,12 @@
                 <a href="<c:url value='?action=${actRep}&command=${commEdt}&id=${report.id}' />">この日報を編集する</a>
             </p>
         </c:if>
+
+        <form method="POST"
+          action="<c:url value= '?action=${actRep}&command=${commIine}' />">
+          <input type="hidden" name="${AttributeConst.REP_ID.getValue()}" value="${report.id}" />
+          <button type="submit" <c:if test='${is_iine == true}'>disabled</c:if>>いいね</button><c:out value="${count}" />件
+        </form>
 
         <p>
             <a href="<c:url value='?action=${actRep}&command=${commIdx}' />">一覧に戻る</a>
